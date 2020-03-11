@@ -16,16 +16,16 @@ class Home extends StatefulWidget {
 class _HomeState extends State<Home> {
   
   final _todoController = TextEditingController();
-
   List _toDoList = [];
 
   
+  @override
   void initState() {
     super.initState();
 
     _readData().then((data) {
       setState(() {
-        _toDoList = json.decode(data);        
+        _toDoList = json.decode(data);
       });
     });
   }
@@ -83,21 +83,7 @@ class _HomeState extends State<Home> {
             child: ListView.builder(
               padding: EdgeInsets.only(top: 10.0),
               itemCount: _toDoList.length,
-              itemBuilder: (context, index) {
-                return CheckboxListTile(
-                  title: Text(_toDoList[index]['title']),
-                  value: _toDoList[index]['ok'],
-                  secondary: CircleAvatar(
-                    child: Icon(_toDoList[index]['ok'] ? Icons.check : Icons.error),
-                  ),
-                  onChanged: (c) {
-                    setState(() {
-                      _toDoList[index]['ok'] = c;
-                      _saveData();
-                    });
-                  },
-                ); // ListTile
-              }
+              itemBuilder: buildItem,
             ),
           ) //Expanded
         ],
@@ -107,7 +93,36 @@ class _HomeState extends State<Home> {
   
 
 
+Widget buildItem(context, index) {
+    return Dismissible(
+      key: Key(index.toString()),
+      background: Container(
+        color: Colors.red,
+        child: Align(
+          alignment: Alignment(-0.9, 0.0),
+          child: Icon(Icons.delete, color: Colors.white),
+        ),
+      ),
+      direction: DismissDirection.startToEnd,
+      child: CheckboxListTile(
+        title: Text(_toDoList[index]['title']),
+        value: _toDoList[index]['ok'],
+        secondary: CircleAvatar(
+          child: Icon(_toDoList[index]['ok'] ? Icons.check : Icons.error),
+        ),
+        onChanged: (c) {
+          setState(() {
+            _toDoList[index]['ok'] = c;
+            _saveData();
+          });
+        },
+      ),
+    );
+  }
 
+
+
+  
   /* Funções */
   Future<File> _getFile() async {
     final directory = await getApplicationDocumentsDirectory();
